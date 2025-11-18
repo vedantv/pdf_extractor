@@ -175,6 +175,29 @@ def df_to_excel_bytes(df: pd.DataFrame) -> bytes:
     return buffer.read()
 
 
+def trigger_download(excel_bytes: bytes, filename: str = "claims_extracted.xlsx"):
+    """
+    Automatically trigger file download using JavaScript.
+    """
+    b64 = base64.b64encode(excel_bytes).decode()
+    mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    
+    download_html = f"""
+    <script>
+    function downloadFile() {{
+        const link = document.createElement('a');
+        link.href = 'data:{mime_type};base64,{b64}';
+        link.download = '{filename}';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }}
+    downloadFile();
+    </script>
+    """
+    st.components.v1.html(download_html, height=0)
+
+
 # -------------------- Streamlit App -------------------- #
 
 def main():
@@ -235,12 +258,15 @@ def main():
 
         df = records_to_dataframe(records)
 
-        st.success("Extraction complete!")
+        st.success("Extraction complete! Downloading Excel file...")
         st.subheader("Extracted Data")
         st.dataframe(df, use_container_width=True)
 
-        # Download as Excel
+        # Automatically download Excel
         excel_bytes = df_to_excel_bytes(df)
+        trigger_download(excel_bytes, "claims_extracted.xlsx")
+        
+        # Also provide download button as fallback option
         st.download_button(
             label="⬇️ Download as Excel",
             data=excel_bytes,
