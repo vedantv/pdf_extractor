@@ -186,31 +186,8 @@ def main():
         "into a single table, then download as Excel."
     )
 
-    # ----- Sidebar: API Key and options ----- #
-    st.sidebar.header("Configuration")
-
-    default_api_key = os.getenv("MISTRAL_API_KEY", "")
-    api_key = st.sidebar.text_input(
-        "Mistral API Key",
-        value=default_api_key,
-        type="password",
-        help="You can also set MISTRAL_API_KEY as an environment variable.",
-    )
-
-    model_name = st.sidebar.text_input(
-        "OCR Model",
-        value="mistral-ocr-latest",
-        help="Default: mistral-ocr-latest",
-    )
-
-    st.sidebar.markdown("---")
-    st.sidebar.info(
-        "Supported templates:\n\n"
-        "- VillageCare Max / VCM\n"
-        "- Anthem\n"
-        "- Centersplan\n\n"
-        "Fields are mapped contextually into a single schema."
-    )
+    # ----- API Key (from environment variable only) ----- #
+    api_key = os.getenv("MISTRAL_API_KEY", "")
 
     # ----- Main area: file upload ----- #
 
@@ -222,7 +199,7 @@ def main():
 
     if st.button("🔍 Extract data", type="primary"):
         if not api_key:
-            st.error("Please enter your Mistral API key in the sidebar.")
+            st.error("MISTRAL_API_KEY environment variable is not set. Please configure it in your environment.")
             return
 
         if not uploaded_files:
@@ -246,8 +223,8 @@ def main():
                 file_bytes = file.read()
                 record = extract_claim_from_file(client, file_bytes, file.name)
                 records.append(record)
-            except Exception as e:
-                st.error(f"Error processing {file.name}: {e}")
+            except Exception:
+                st.error(f"Error processing `{file.name}`. Please try uploading this PDF again.")
             progress.progress(i / len(uploaded_files))
 
         status_placeholder.empty()
