@@ -9,6 +9,8 @@ import streamlit as st
 from pydantic import BaseModel, Field
 from mistralai import Mistral
 from mistralai.extra import response_format_from_pydantic_model
+from dotenv import load_dotenv
+load_dotenv()
 
 
 # -------------------- Pydantic Schema -------------------- #
