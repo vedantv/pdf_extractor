@@ -3,3 +3,4 @@ mistralai
 pydantic 
 pandas 
 openpyxl
+python-dotenv
